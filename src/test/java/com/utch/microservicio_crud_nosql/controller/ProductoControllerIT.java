@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(properties = "spring.data.mongodb.database=productosdb_test")
+@TestPropertySource(properties = "spring.mongodb.database=productosdb_test")
 @EnabledIfEnvironmentVariable(named = "MONGODB_URI", matches = ".+")
 class ProductoControllerIT {
 
