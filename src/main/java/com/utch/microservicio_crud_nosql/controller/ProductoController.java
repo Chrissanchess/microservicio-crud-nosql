@@ -1,5 +1,6 @@
 package com.utch.microservicio_crud_nosql.controller;
 
+import com.utch.microservicio_crud_nosql.dto.ProductoRequest;
 import com.utch.microservicio_crud_nosql.model.Producto;
 import com.utch.microservicio_crud_nosql.service.ProductoService;
 import jakarta.validation.Valid;
@@ -27,8 +28,8 @@ public class ProductoController {
     }
 
     @PostMapping
-    public ResponseEntity<Producto> crear(@Valid @RequestBody Producto producto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(producto));
+    public ResponseEntity<Producto> crear(@Valid @RequestBody ProductoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(request.toEntity()));
     }
 
     @GetMapping
@@ -44,8 +45,8 @@ public class ProductoController {
     @PutMapping("/{id}")
     public ResponseEntity<Producto> actualizar(
             @PathVariable String id,
-            @Valid @RequestBody Producto producto) {
-        return ResponseEntity.ok(service.actualizar(id, producto));
+            @Valid @RequestBody ProductoRequest request) {
+        return ResponseEntity.ok(service.actualizar(id, request.toEntity()));
     }
 
     @DeleteMapping("/{id}")

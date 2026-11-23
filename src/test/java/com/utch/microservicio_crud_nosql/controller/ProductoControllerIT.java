@@ -1,5 +1,6 @@
 package com.utch.microservicio_crud_nosql.controller;
 
+import com.utch.microservicio_crud_nosql.dto.ProductoRequest;
 import com.utch.microservicio_crud_nosql.model.Producto;
 import com.utch.microservicio_crud_nosql.repository.ProductoRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,8 +14,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,7 +49,7 @@ class ProductoControllerIT {
     void crearProductoValidoDevuelve201YElId() throws Exception {
         mockMvc.perform(post("/api/productos")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new Producto(null, "Teclado", 125.0, 10))))
+                        .content(json(new ProductoRequest("Teclado", 125.0, 10))))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").isNotEmpty())
@@ -55,10 +57,30 @@ class ProductoControllerIT {
     }
 
     @Test
+    void crearProductoIgnoraIdEnviadoEnElCuerpo() throws Exception {
+        String idEnviado = "id-controlado-por-cliente";
+
+        mockMvc.perform(post("/api/productos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "id": "%s",
+                                  "nombre": "Teclado",
+                                  "precio": 125.0,
+                                  "stock": 10
+                                }
+                                """.formatted(idEnviado)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.id").value(not(idEnviado)));
+    }
+
+    @Test
     void crearProductoInvalidoDevuelve400ConErroresPorCampo() throws Exception {
         mockMvc.perform(post("/api/productos")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new Producto(null, "", -1.0, -1))))
+                        .content(json(new ProductoRequest("", -1.0, -1))))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(400))
@@ -74,7 +96,7 @@ class ProductoControllerIT {
 
         mockMvc.perform(post("/api/productos")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new Producto(null, "Teclado", 130.0, 8))))
+                        .content(json(new ProductoRequest("Teclado", 130.0, 8))))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(409))
@@ -119,7 +141,7 @@ class ProductoControllerIT {
 
         mockMvc.perform(put("/api/productos/{id}", existente.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new Producto(null, "Teclado mecánico", 150.0, 8))))
+                        .content(json(new ProductoRequest("Teclado mecánico", 150.0, 8))))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(existente.getId()))
@@ -131,7 +153,7 @@ class ProductoControllerIT {
     void actualizarProductoInexistenteDevuelve404() throws Exception {
         mockMvc.perform(put("/api/productos/{id}", "id-inexistente")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new Producto(null, "Teclado", 125.0, 10))))
+                        .content(json(new ProductoRequest("Teclado", 125.0, 10))))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(404));
@@ -144,7 +166,7 @@ class ProductoControllerIT {
 
         mockMvc.perform(put("/api/productos/{id}", existente.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new Producto(null, "Ratón", 55.0, 4))))
+                        .content(json(new ProductoRequest("Ratón", 55.0, 4))))
                 .andExpect(status().isConflict())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(409));
@@ -180,7 +202,7 @@ class ProductoControllerIT {
                 .andExpect(jsonPath("$.path").value("/api/productos"));
     }
 
-    private String json(Producto producto) throws Exception {
-        return objectMapper.writeValueAsString(producto);
+    private String json(ProductoRequest request) throws Exception {
+        return objectMapper.writeValueAsString(request);
     }
 }
