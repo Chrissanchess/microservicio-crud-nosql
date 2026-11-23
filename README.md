@@ -86,7 +86,16 @@ Respuesta `200 OK`:
 
 `GET /api/productos/665f1a2b3c4d5e6f7890abcd`
 
-Respuesta `200 OK`: el objeto de producto mostrado en la respuesta de creación.
+Respuesta `200 OK`:
+
+```json
+{
+  "id": "665f1a2b3c4d5e6f7890abcd",
+  "nombre": "Teclado",
+  "precio": 125.0,
+  "stock": 10
+}
+```
 
 ### Actualizar producto
 
@@ -102,7 +111,16 @@ Petición:
 }
 ```
 
-Respuesta `200 OK`: el objeto actualizado, incluido su `id`.
+Respuesta `200 OK`:
+
+```json
+{
+  "id": "665f1a2b3c4d5e6f7890abcd",
+  "nombre": "Teclado mecánico",
+  "precio": 150.0,
+  "stock": 8
+}
+```
 
 ### Eliminar producto
 
